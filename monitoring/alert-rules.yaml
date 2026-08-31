@@ -101,3 +101,70 @@ spec:
             summary: "Node {{ $labels.node }} is down"
             description: "Node {{ $labels.node }} is NotReady or unreachable."
             runbook_url: "https://github.com/teqeva/Faraja/blob/main/docs/runbooks/node-down.md"
+        - alert: FarajaPVCPending
+          expr: |
+            kube_persistentvolumeclaim_status_phase{namespace="faraja-ns", phase="Pending"} == 1
+          for: 5m
+          labels:
+            severity: warning
+            team: backend
+          annotations:
+            summary: "PVC {{ $labels.persistentvolumeclaim }} is pending"
+            description: "PVC {{ $labels.persistentvolumeclaim }} in faraja-ns has been Pending for 5+ minutes. Impact: dependent pod cannot start."
+            runbook_url: "https://github.com/teqeva/Faraja/blob/main/docs/runbooks/pvc-pending.md"
+
+        - alert: FarajaTrafficDrop
+          expr: |
+            (
+              sum(rate(http_requests_total[5m]))
+              /
+              sum(rate(http_requests_total[5m] offset 1w))
+            ) * 100 < 50
+          for: 5m
+          labels:
+            severity: critical
+            team: backend
+          annotations:
+            summary: "Faraja traffic dropped over 50%"
+            description: "Request rate is {{ $value | humanize }}% of last week's rate at this time. Impact: possible outage or upstream issue."
+            runbook_url: "https://github.com/teqeva/Faraja/blob/main/docs/runbooks/traffic-drop.md"
+
+        - alert: FarajaCPUThrottlingHigh
+          expr: |
+            (rate(container_cpu_cfs_throttled_seconds_total{namespace="faraja-ns"}[5m])
+            / rate(container_cpu_usage_seconds_total{namespace="faraja-ns"}[5m])) * 100 > 25
+          for: 5m
+          labels:
+            severity: warning
+            team: backend
+          annotations:
+            summary: "Faraja container CPU throttled above 25%"
+            description: "Container {{ $labels.container }} in pod {{ $labels.pod }} is being throttled at {{ $value | humanize }}%. Impact: degraded performance under load."
+            runbook_url: "https://github.com/teqeva/Faraja/blob/main/docs/runbooks/cpu-throttling.md"
+
+        - alert: FarajaHighCPUUsage
+          expr: |
+            sum(rate(container_cpu_usage_seconds_total{namespace="faraja-ns", container!=""}[5m])) by (pod)
+            / sum(kube_pod_container_resource_limits{namespace="faraja-ns", resource="cpu"}) by (pod)
+            * 100 > 90
+          for: 15m
+          labels:
+            severity: warning
+            team: backend
+          annotations:
+            summary: "Faraja pod CPU usage above 90% of limit"
+            description: "Pod {{ $labels.pod }} in faraja-ns is at {{ $value | humanize }}% of its CPU limit for 15+ minutes. Impact: risk of throttling, degraded response times."
+            runbook_url: "https://github.com/teqeva/Faraja/blob/main/docs/runbooks/high-cpu-usage.md"
+
+        - alert: FarajaHPAMaxReplicas
+          expr: |
+            kube_horizontalpodautoscaler_status_current_replicas{namespace="faraja-ns"}
+            == kube_horizontalpodautoscaler_spec_max_replicas{namespace="faraja-ns"}
+          for: 15m
+          labels:
+            severity: warning
+            team: backend
+          annotations:
+            summary: "HPA {{ $labels.horizontalpodautoscaler }} at max replicas"
+            description: "HPA has been at its max replica count for 15+ minutes. Impact: cannot scale further to absorb more load."
+            runbook_url: "https://github.com/teqeva/Faraja/blob/main/docs/runbooks/hpa-max-replicas.md"
