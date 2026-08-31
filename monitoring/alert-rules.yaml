@@ -168,3 +168,14 @@ spec:
             summary: "HPA {{ $labels.horizontalpodautoscaler }} at max replicas"
             description: "HPA has been at its max replica count for 15+ minutes. Impact: cannot scale further to absorb more load."
             runbook_url: "https://github.com/teqeva/Faraja/blob/main/docs/runbooks/hpa-max-replicas.md"
+        - alert: CoreDNSDown
+          expr: |
+            kube_deployment_status_replicas_available{deployment="coredns", namespace="kube-system"} == 0
+          for: 2m
+          labels:
+            severity: critical
+            team: platform
+          annotations:
+            summary: "CoreDNS is down"
+            description: "CoreDNS has zero available replicas. Impact: all in-cluster service discovery fails — pods cannot resolve Service names, breaking backend-to-database and frontend-to-backend communication."
+            runbook_url: "https://github.com/teqeva/Faraja/blob/main/docs/runbooks/coredns-down.md"
