@@ -6,7 +6,7 @@ Faraja is a web application for tracking public infrastructure projects like roa
 - Start and target-end dates
 - A status: planned, in_progress, delayed, completed, or cancelled
 - An implementing agency and a lead politician responsible for it
-- 
+  
 ## Team Members
 
 | Name              | GitHub                                                     | Role     |
