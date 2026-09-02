@@ -6,6 +6,29 @@ Faraja is a web application for tracking public infrastructure projects like roa
 - Start and target-end dates
 - A status: planned, in_progress, delayed, completed, or cancelled
 - An implementing agency and a lead politician responsible for it
+- 
+## Team Members
+
+| Name              | GitHub                                                     | Role     |
+| ----------------- | ---------------------------------------------------------- | -------- |
+| Abdirahman Maalim | [@Abdirahman-Maalim](https://github.com/Abdirahman-Maalim) | Backend  |
+| Eva Muthoni       | [@teqeva](https://github.com/teqeva)                       | Frontend |
+| Karen Ngugi       | [@KarenNgugi](https://github.com/KarenNgugi)               | Backend  |
+
+## Table of Contents
+
+1. [Running the App Locally](#part-1-running-the-app-locally)
+
+2. [Running Everything with Docker](#part-2-running-everything-with-docker)
+
+3. [Deploying to Kubernetes](#part-3---deploying-to-kubernetes)
+
+4. [Monitoring (Prometheus + Grafana)](#part-4-monitoring-prometheus--grafana)
+
+5. [Git Branching Best Practices](#git-branching-best-practices)
+
+6. [Thank You](#6-thank-you)
+
 
 Each project can have milestones - smaller checkpoints within the project, each with their own due date and status (not_started, in_progress, done, blocked).
 
@@ -15,14 +38,27 @@ The app has two separate pieces that talk to each other:
 
 ---
 
-## Part 1: Running the app on your own laptop
+## Part 1: Running the App Locally
 
-### Step 1: Get the code
+### Prerequisites
+
+Before cloning the repository, ensure you have:
+
+* Git installed (`git --version`)
+* A GitHub account with access to the repository
+
+### Clone the Repository
+
+Using HTTPS:
 
 ```bash
-
 git clone https://github.com/Abdirahman-Maalim/faraja.git
-cd faraja
+```
+
+Using SSH:
+
+```bash
+git clone git@github.com:Abdirahman-Maalim/faraja.git
 ```
 ---
 
@@ -149,7 +185,7 @@ docker build -t faraja-frontend:latest .
 
 ---
 
-Running everything together with Docker Compose
+### Running Everything Together with Docker Compose
 
 The yaml file describes all your services and how they connect.It defines:
 
@@ -194,13 +230,12 @@ docker-compose up -d --build
 
 ```
 
-# Part 3:  Deploying to Kubernetes
+## Part 3 - Deploying to Kubernetes
 
 Kubernetes manages containerized applications by handling pod restarts, scaling, networking, and updates.
 
 For this project, we use **Minikube** to run Kubernetes locally.
 
----
 
 ## Folder Structure
 
@@ -222,7 +257,7 @@ k8s/
 
 ---
 
-## 1. Build and Load Images
+### 1. Build and Load Images
 
 Build the application images:
 
@@ -242,7 +277,7 @@ minikube image load faraja-frontend:latest
 
 ---
 
-## 2. Dry-Run Before Deployment
+### 2. Dry-Run Before Deployment
 
 Before applying the manifests, validate them using a server-side dry run:
 
@@ -262,7 +297,7 @@ kubectl apply -f k8s/ --dry-run=client
 
 ---
 
-## 3. Deploy Everything
+### 3. Deploy Everything
 
 Once the dry run succeeds:
 
@@ -325,7 +360,7 @@ STATUS: Bound
 
 ---
 
-## 4. Verify the Deployment
+### 4. Verify the Deployment
 
 Check Pods:
 
@@ -359,7 +394,7 @@ minikube service frontend-service -n faraja-ns
 
 ---
 
-## 5. After Code Changes
+### 5. After Code Changes
 
 Rebuild and reload the affected image:
 
@@ -720,3 +755,73 @@ To display `0` instead, use:
 ```
 
 This returns `0` when the original query has no results.
+
+## Git Branching Best Practices
+
+We follow a structured branching strategy to keep development organized and protect the main codebase.
+
+### Branch Structure
+
+* `main` — Stable, production-ready code.
+* `develop` — Integration branch where completed features are combined and tested.
+* `feature/*` — Used for developing individual features or tasks.
+* `fix/*` — Used for fixing bugs and issues.
+
+### Branching Workflow
+
+1. Start from the latest `develop` branch.
+2. Create a separate branch for your task.
+3. Make and test your changes.
+4. Commit changes with clear, meaningful messages.
+5. Push the branch to GitHub.
+6. Open a Pull Request into `develop`.
+7. Request a review from another team member.
+8. Address review comments and push additional commits if needed.
+9. Merge only after approval and successful CI checks.
+10. Delete the feature/fix branch after merging.
+
+### Example
+
+```bash
+git checkout develop
+git pull origin develop
+
+git checkout -b feature/frontend-dashboard
+
+# Make changes
+
+git add .
+git commit -m "feat: add project dashboard"
+git push -u origin feature/frontend-dashboard
+```
+
+After the Pull Request is approved:
+
+```bash
+git checkout develop
+git pull origin develop
+git branch -d feature/frontend-dashboard
+git push origin --delete feature/frontend-dashboard
+```
+
+### Branch Naming
+
+Use descriptive names based on the work being done:
+
+```text
+feature/frontend-dashboard
+feature/project-api
+feature/kubernetes-deployment
+fix/database-connection
+fix/frontend-api-url
+docs/update-readme
+```
+
+ 
+## 6. Thank You
+
+Thank you for contributing to Faraja!
+
+We appreciate every contribution, whether it is a new feature, bug fix, documentation improvement, or code review.
+
+For questions or suggestions, please open an issue or discuss them with the project team.
